@@ -1,3 +1,4 @@
+from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
 from django.http import HttpResponse
 from .models import ArticlePost
@@ -45,6 +46,7 @@ def article_detail(request, id):
 
 
 # 写文章的视图
+@login_required(login_url='/userprofile/login/')
 def article_create(request):
     # 判断用户是否提交数据
     if request.method == "POST":
@@ -57,7 +59,8 @@ def article_create(request):
             # 指定数据库中 id=1 的用户为作者
             # 如果你进行过删除数据表的操作，可能会找不到id=1的用户
             # 此时请重新创建用户，并传入此用户的id
-            new_article.author = User.objects.get(id=1)
+            # 指定目前登录的用户为作者
+            new_article.author = User.objects.get(id=request.user.id)
             # 将新文章保存到数据库中
             new_article.save()
             # 完成后返回到文章列表
@@ -76,6 +79,7 @@ def article_create(request):
 
 
 # 删文章
+@login_required(login_url='/userprofile/login/')
 def article_delete(request, id):
     # 根据 id 获取需要删除的文章
     article = ArticlePost.objects.get(id=id)
@@ -86,6 +90,7 @@ def article_delete(request, id):
 
 
 # 安全删除文章
+@login_required(login_url='/userprofile/login/')
 def article_safe_delete(request, id):
     if request.method == 'POST':
         article = ArticlePost.objects.get(id=id)
@@ -96,6 +101,7 @@ def article_safe_delete(request, id):
 
 
 # 更新文章
+@login_required(login_url='/userprofile/login/')
 def article_update(request, id):
     """
     更新文章的视图函数

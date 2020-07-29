@@ -21,6 +21,7 @@
                 {% if user.is_authenticated %}
                     <!-- 如果用户已经登录，则显示用户名下拉框 -->
                     <li class="nav-item dropdown">
+                        <a class="dropdown-item" href='{% url "userprofile:edit" user.id %}'>个人信息</a>
                         <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
                            data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                             {{ user.username }}
