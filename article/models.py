@@ -13,6 +13,9 @@ class ArticlePost(models.Model):
     # 文章标题。models.CharField 为字符串字段，用于保存较短的字符串，比如标题
     title = models.CharField(max_length=100)
 
+    # 增加文章的浏览量字段
+    total_views = models.PositiveIntegerField(default=0)  # PositiveIntegerField是用于存储正整数的字段
+
     # 文章正文。保存大量文本使用 TextField
     body = models.TextField()
 

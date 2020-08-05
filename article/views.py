@@ -37,6 +37,10 @@ def article_detail(request, id):
     # 取出相应的文章
     article = ArticlePost.objects.get(id=id)
 
+    # 浏览量 +1
+    article.total_views += 1
+    article.save(update_fields=['total_views'])
+
     # 将markdown语法渲染成html样式
     article.body = markdown.markdown(article.body,
                                      extensions=[
@@ -90,6 +94,9 @@ def article_create(request):
 def article_delete(request, id):
     # 根据 id 获取需要删除的文章
     article = ArticlePost.objects.get(id=id)
+    # 增加用户判断
+    if request.user != article.author:
+        return HttpResponse("抱歉，你无权删除这篇文章！")
     # 调用.delete()方法删除文章
     article.delete()
     # 完成删除后返回文章列表
@@ -101,6 +108,9 @@ def article_delete(request, id):
 def article_safe_delete(request, id):
     if request.method == 'POST':
         article = ArticlePost.objects.get(id=id)
+        # 增加用户判断
+        if request.user != article.author:
+            return HttpResponse("抱歉，你无权删除这篇文章！")
         article.delete()
         return redirect("article:article_list")
     else:
@@ -108,7 +118,7 @@ def article_safe_delete(request, id):
 
 
 # 更新文章
-@login_required(login_url='/userprofile/login/')
+@login_required(login_url='/userprofile/login/')  # 必须用户登录之后才可以更新文章
 def article_update(request, id):
     """
     更新文章的视图函数
@@ -119,6 +129,11 @@ def article_update(request, id):
 
     # 获取需要修改的具体文章对象
     article = ArticlePost.objects.get(id=id)
+
+    # 过滤非作者的用户
+    if request.user != article.autho:
+        return HttpResponse("抱歉，你无权修改这篇文章！")
+
     # 判断用户是否为 POST 提交表单数据
     if request.method == "POST":
         # 将提交的数据赋值到表单实例中
