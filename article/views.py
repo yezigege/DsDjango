@@ -1,5 +1,6 @@
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
+from django.db.models import Q
 from django.shortcuts import render
 from django.http import HttpResponse
 from .models import ArticlePost
@@ -18,13 +19,26 @@ from django.contrib.auth.models import User
 
 
 def article_list(request):
-    # 根据 GET 请求中查询条件返回不同排序的对象数组
-    if request.GET.get('order') == 'total_views':
-        article_list = ArticlePost.objects.all().order_by('-total_views')
-        order = 'total_views'
+    search = request.GET.get('search', '')
+    order = request.GET.get('order')
+    # 用户搜索逻辑
+    if search:
+        if order == 'total_views':
+            # 用 Q 对象，进行联合搜索
+            article_list = ArticlePost.objects.filter(
+                Q(title__icontains=search) |  # 在模型的title字段查询，icontains是不区分大小写的包含, 使用 __ 隔开
+                Q(body__icontains=search)
+            ).order_by('-total_views')
+        else:
+            article_list = ArticlePost.objects.filter(
+                Q(title__icontains=search) |
+                Q(body__icontains=search)
+            )
     else:
-        article_list = ArticlePost.objects.all()
-        order = 'normal'
+        if order == 'total_views':
+            article_list = ArticlePost.objects.all().order_by('-total_views')
+        else:
+            article_list = ArticlePost.objects.all()
     # 每页显示 3 篇文章
     paginator = Paginator(article_list, 3)
     # 获取 url 中的页码
@@ -32,7 +46,7 @@ def article_list(request):
     # 将导航对象相应的页码内容返回给 articles
     articles = paginator.get_page(page)
 
-    context = {'articles': articles, 'order': order}  # order给模板一个标识，提醒模板下一页应该如何排序
+    context = {'articles': articles, 'order': order, 'search': search}  # order给模板一个标识，提醒模板下一页应该如何排序
     return render(request, 'article/list.html', context)
 
 
