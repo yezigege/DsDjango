@@ -60,16 +60,20 @@ def article_detail(request, id):
     article.save(update_fields=['total_views'])
 
     # 将markdown语法渲染成html样式
-    article.body = markdown.markdown(article.body,
-                                     extensions=[
-                                         # 包含 缩写、表格等常用扩展
-                                         'markdown.extensions.extra',
-                                         # 语法高亮扩展
-                                         'markdown.extensions.codehilite',
-                                     ])
+    md = markdown.Markdown(
+        extensions=[
+            # 包含 缩写、表格等常用扩展
+            'markdown.extensions.extra',
+            # 语法高亮扩展
+            'markdown.extensions.codehilite',
+            # 目录扩展
+            'markdown.extensions.toc',
+        ]
+    )
+    article.body = md.convert(article.body)
 
     # 需要传递给模板的对象
-    context = {'article': article}
+    context = {'article': article, 'toc': md.toc}
     # 载入模板，并返回context对象
     return render(request, 'article/detail.html', context)
 
@@ -149,7 +153,7 @@ def article_update(request, id):
     article = ArticlePost.objects.get(id=id)
 
     # 过滤非作者的用户
-    if request.user != article.autho:
+    if request.user != article.author:
         return HttpResponse("抱歉，你无权修改这篇文章！")
 
     # 判断用户是否为 POST 提交表单数据
