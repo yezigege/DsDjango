@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     # 注册本地app
     'article',
     'userprofile',
+    'comment'
 ]
 
 MIDDLEWARE = [

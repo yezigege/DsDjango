@@ -3,6 +3,8 @@ from django.core.paginator import Paginator
 from django.db.models import Q
 from django.shortcuts import render
 from django.http import HttpResponse
+
+from comment.models import Comment
 from .models import ArticlePost
 
 # 导入 markdown 模块
@@ -55,6 +57,9 @@ def article_detail(request, id):
     # 取出相应的文章
     article = ArticlePost.objects.get(id=id)
 
+    # 取出文章评论
+    comments = Comment.objects.filter(article=id)  # filter 可以取出多个对象
+
     # 浏览量 +1
     article.total_views += 1
     article.save(update_fields=['total_views'])
@@ -73,7 +78,7 @@ def article_detail(request, id):
     article.body = md.convert(article.body)
 
     # 需要传递给模板的对象
-    context = {'article': article, 'toc': md.toc}
+    context = {'article': article, 'toc': md.toc, 'comments': comments}
     # 载入模板，并返回context对象
     return render(request, 'article/detail.html', context)
 
