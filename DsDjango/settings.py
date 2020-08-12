@@ -38,6 +38,7 @@ INSTALLED_APPS = [
 
     # 第三方包
     'password_reset',  # 重置密码功能
+    'taggit',  # 标签
 
     # 注册本地app
     'article',

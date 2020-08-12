@@ -104,6 +104,9 @@ def article_create(request):
                 new_article.column = ArticleColumn.objects.get(id=request.POST['column'])
             # 将新文章保存到数据库中
             new_article.save()
+            # 保存 tags 的多对多关系
+            article_post_form.save_m2m()
+
             # 完成后返回到文章列表
             return redirect("article:article_list")
         # 如果数据不合法，返回错误信息
